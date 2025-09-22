@@ -1,7 +1,68 @@
 <script setup>
 import { VerticalNav } from '@layouts/components'
 import { useLayoutConfigStore } from '@layouts/stores/config'
+import { ref, onMounted, watch, nextTick } from 'vue'
+import { useRouter, useRoute } from 'vue-router'
 
+const router = useRouter()
+const route = useRoute()
+
+
+
+const tabs = [
+  {
+    name: 'dashboards-fit-dash',
+    label: 'Home',
+    icon: 'tabler-smart-home',
+    route: { name: 'dashboards-fit-dash' },
+  },
+  {
+    name: 'apps-fitcode-reports',
+    label: 'Reports',
+    icon: 'tabler-file-text',
+    route: { name: 'apps-fitcode-reports' },
+  },
+  {
+    name: 'apps-fitcode-trends',
+    label: 'Trends',
+    icon: 'tabler-chart-line',
+    route: { name: 'apps-fitcode-trends' },
+  },
+]
+
+
+const tabRefs = ref([])
+const indicatorLeft = ref(0)
+const indicatorWidth = ref(0)
+
+
+const updateIndicator = () => {
+  nextTick(() => {
+    const activeIndex = tabs.findIndex(t => t.name === activeTab.value)
+    const tabEl = tabRefs.value[activeIndex]
+    if (tabEl) {
+      indicatorLeft.value = tabEl.offsetLeft
+      indicatorWidth.value = tabEl.offsetWidth
+    }
+  })
+}
+
+
+const goTo = (tab) => {
+  activeTab.value = tab.name
+  router.push(tab.route)
+}
+
+const activeTab = ref(route.name || 'dashboards-fit-dash')
+
+watch(route, () => {
+  activeTab.value = route.name
+  updateIndicator()
+})
+
+
+onMounted(() => updateIndicator())
+watch(activeTab, updateIndicator)
 const props = defineProps({
   navItems: {
     type: null,
@@ -20,14 +81,9 @@ const isOverlayNavActive = ref(false)
 const isLayoutOverlayVisible = ref(false)
 const toggleIsOverlayNavActive = useToggle(isOverlayNavActive)
 
-// ℹ️ This is alternative to below two commented watcher
 
-// We want to show overlay if overlay nav is visible and want to hide overlay if overlay is hidden and vice versa.
 syncRef(isOverlayNavActive, isLayoutOverlayVisible)
 
-// })
-
-// ℹ️ Hide overlay if user open overlay nav in <md and increase the window width without closing overlay nav
 watch(windowWidth, () => {
   if (!configStore.isLessThanOverlayNavBreakpoint && isLayoutOverlayVisible.value)
     isLayoutOverlayVisible.value = false
@@ -105,6 +161,31 @@ const verticalNavAttrs = computed(() => {
       @click="() => { isLayoutOverlayVisible = !isLayoutOverlayVisible }"
     />
   </div>
+
+   <!-- Bottom nav only for small devices -->
+   <nav class="bottom-nav d-md-none">
+    <ul>
+      <li
+        v-for="(tab, index) in tabs"
+        :key="tab.name"
+        :class="{ active: activeTab === tab.name }"
+        @click="goTo(tab)"
+        ref="tabRefs"
+      >
+        <i :class="tab.icon"></i>
+        <span>{{ tab.label }}</span>
+      </li>
+    </ul>
+
+    
+    <div
+      class="indicator"
+      :style="{
+        width: indicatorWidth + 'px',
+        left: indicatorLeft + 'px'
+      }"
+    ></div>
+  </nav>
 </template>
 
 <style lang="scss">
@@ -212,4 +293,61 @@ const verticalNavAttrs = computed(() => {
     }
   }
 }
+.bottom-nav {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  background: #fff;
+  box-shadow: 0 -1px 6px rgba(0,0,0,0.1);
+  z-index: 1000;
+}
+
+.bottom-nav ul {
+  display: flex;
+  justify-content: space-around;
+  margin: 0;
+  padding: 0.5rem 0;
+  list-style: none;
+  position: relative;
+}
+
+.bottom-nav li {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  position: relative;
+  padding: 0.6rem 0.4rem;
+  color: #999; 
+  transition: color 0.3s ease;
+  z-index: 1;
+}
+
+.bottom-nav i {
+  font-size: 20px;
+  margin-bottom: 2px;
+}
+
+.bottom-nav span {
+  font-size: 12px;
+}
+
+
+.bottom-nav li.active {
+  color: #fff; 
+}
+
+.bottom-nav li.active::before {
+  content: "";
+  position: absolute;
+  inset: 0.2rem 0.6rem; 
+  background: purple;
+  border-radius: 20px 20px 0 0; 
+  z-index: -1;
+  transition: all 0.3s ease;
+}
+
 </style>

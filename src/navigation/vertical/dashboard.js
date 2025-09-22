@@ -4,6 +4,11 @@ export default [
     icon: { icon: 'tabler-smart-home' },
     children: [
       {
+        title: 'FitCode Dashboard',
+        to: 'dashboards-fit-dash',
+      }
+      ,
+      {
         title: 'Analytics',
         to: 'dashboards-analytics',
       },
@@ -24,7 +29,7 @@ export default [
         to: 'dashboards-logistics',
       },
     ],
-    badgeContent: '5',
+    badgeContent: '6',
     badgeClass: 'bg-error',
   },
   {

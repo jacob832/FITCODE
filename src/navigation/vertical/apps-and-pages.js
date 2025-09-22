@@ -1,6 +1,14 @@
 export default [
   { heading: 'Apps & Pages' },
   {
+    title:"FITCODE",
+    icon:{icon:'tabler-code'},
+    children:[
+      {title:'Reports',to:'apps-fitcode-reports'},
+      {title:'Trends',to:'apps-fitcode-trends'}
+    ]
+  },
+  {
     title: 'Ecommerce',
     icon: { icon: 'tabler-shopping-cart' },
     children: [

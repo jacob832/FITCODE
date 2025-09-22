@@ -25,4 +25,5 @@ const configStore = useConfigStore()
       <ScrollToTop />
     </VApp>
   </VLocaleProvider>
+  
 </template>
